@@ -1,37 +1,52 @@
 <template>
-  <div class="container">
+  <div class="main-container">
     <h1>Mini E-Commerce</h1>
 
-    <div class="card">
-      <h2>Add Product</h2>
+  <div class="card">
+  <h2>Add Product</h2> <br />
 
-      <input v-model="name" placeholder="Product Name" />
+  <label>Product Name</label>
+  <input v-model="name" placeholder="Enter product name" />
 
-      <input v-model.number="price" type="number" placeholder="Price" />
+  <label>Price (Rs)</label>
+<input
+  v-model.number="price"
+  type="number"
+  placeholder="Enter price"
+  min="0"
+  
+  oninput="this.value = Math.abs(this.value)"
+/>
 
-      <button @click="addProduct">Add</button>
-    </div>
+  <button @click="addProduct">Add</button>
+</div>
 
     <div class="card">
       <h2>Products</h2>
-
       <input v-model="search" placeholder="Search product..." />
-
-      <div
-        v-for="(product, index) in filteredProducts"
-        :key="product.id"
-        class="product"
-      >
-        <span>{{ product.name }} - Rs {{ product.price }}</span>
-
-        <div>
-          <button @click="addToCart(product)">Add to Cart</button>
-
-          <button class="delete" @click="deleteProduct(index)">
-            Delete
-          </button>
-        </div>
-      </div>
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(product, index) in filteredProducts" :key="product.id">
+            <td>{{ product.name }}</td>
+            <td>Rs {{ product.price }}</td>
+            <td>{{ product.quantity || 1 }}</td>
+            <td>
+              <div class="action-buttons">
+                <button @click="addToCart(product)">Add to Cart</button>
+                <button class="delete" @click="deleteProduct(index)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="card">
@@ -95,34 +110,55 @@ const saveCart = () => {
     JSON.stringify(cart.value)
   )
 }
+const blockNegative = (e) => {
+  if (e.key === "-" || e.key === "e") {
+    e.preventDefault()
+  }
+}
 
-
+const fixNegative = () => {
+  if (price.value < 0) {
+    price.value = 0
+  }
+}
 const addProduct = () => {
-
-  if (!name.value || !price.value) {
-    alert("Enter name and price")
+  if (!name.value.trim()) {
+    alert("Enter product name")
     return
   }
 
+  if (price.value === "" || price.value === null) {
+    alert("Enter price")
+    return
+  }
 
+  if (price.value <= 0) {
+    alert("Price must be greater than 0")
+    return
+  }
   const newProduct = {
-    id: Date.now(),      
+    id: Date.now(),
     name: name.value,
-    price: price.value
+    price: Number(price.value)
   }
 
   products.value.push(newProduct)
-
   saveProducts()
 
   name.value = ""
   price.value = ""
 }
 
-const deleteProduct = (index) => {
-  products.value.splice(index, 1)
-  saveProducts()
-}
+// const deleteProduct = (index) => {
+//   products.value.splice(index, 1)
+//   saveProducts()
+// }
+
+const removeItem = () => {
+  emit('remove-item', props.item.id); 
+};
+
+
 
 const filteredProducts = computed(() => {
   return products.value.filter(p =>
@@ -168,11 +204,41 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
 </script>
 
 <style>
+*{
+  color: black;
+}
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.product-table th, .product-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+.product-table th {
+  background: #eaeaea;
+}
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 .container {
   max-width: 600px;
   margin: auto;
   font-family: Arial;
   color: black;
+
+.main-container {
+  max-width: 600px;
+  width: 100%;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 }
 
 
