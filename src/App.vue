@@ -1,161 +1,224 @@
 <template>
-  <div class="app">
-    <header class="header">
-      <h1>Shop Here</h1>
-      <div class="cart-badge">
-         Cart <span>0</span>
-      </div>
-    </header>
-    <div class="container">
-      <div class="card">
-        <h2>Add Product</h2>
-        <div class="form">
-          <input v-model="newName" placeholder="Product name" />
-          <input v-model.number="newPrice" type="number" placeholder="Price" />
-          <button class="primary" @click="addProduct">Add Product</button>
+  <div class="container">
+    <h1>Mini E-Commerce</h1>
+
+    <div class="card">
+      <h2>Add Product</h2>
+
+      <input v-model="name" placeholder="Product Name" />
+
+      <input v-model.number="price" type="number" placeholder="Price" />
+
+      <button @click="addProduct">Add</button>
+    </div>
+
+    <div class="card">
+      <h2>Products</h2>
+
+      <input v-model="search" placeholder="Search product..." />
+
+      <div
+        v-for="(product, index) in filteredProducts"
+        :key="product.id"
+        class="product"
+      >
+        <span>{{ product.name }} - Rs {{ product.price }}</span>
+
+        <div>
+          <button @click="addToCart(product)">Add to Cart</button>
+
+          <button class="delete" @click="deleteProduct(index)">
+            Delete
+          </button>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>Products</h2>
+    <div class="card">
+      <h2>Cart 🛒 ({{ cart.length }})</h2>
 
-        <div v-if="products.length === 0">No products yet</div>
-        <div class="grid">
-          <div
-            class="product-card"
-            v-for="product in products"
-            :key="product.id"
-          >
-            <h3>{{ product.name }}</h3>
-            <p class="price">Rs {{ product.price }}</p>
+      <div v-if="cart.length === 0">Cart is empty</div>
 
-            <div class="actions">
-              <button class="primary">Add to Cart</button>
-              <button class="danger">Delete</button>
-            </div>
-          </div>
-        </div>
+      <div
+        v-for="(item, index) in cart"
+        :key="index"
+        class="product"
+      >
+        <span>{{ item.name }} - Rs {{ item.price }}</span>
+
+        <button class="delete" @click="removeFromCart(index)">
+          Remove
+        </button>
       </div>
 
-      <div class="card">
-        <h2>Your Cart</h2>
-        <p>Cart is empty</p>
-      </div>
+      <button
+        v-if="cart.length"
+        class="checkout"
+        @click="checkout"
+      >
+        Checkout
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue"
 
-const products = ref([])
+import { ref, computed, onMounted } from "vue"
 
-const newName = ref("")
-const newPrice = ref("")
+const name = ref("")      
+const price = ref("")     
+const search = ref("")    
+
+const products = ref([])  
+const cart = ref([])      
+
+onMounted(() => {
+  products.value =
+    JSON.parse(localStorage.getItem("products")) || []
+
+  cart.value =
+    JSON.parse(localStorage.getItem("cart")) || []
+})
+
+const saveProducts = () => {
+  localStorage.setItem(
+    "products",
+    JSON.stringify(products.value)
+  )
+}
+
+
+const saveCart = () => {
+  localStorage.setItem(
+    "cart",
+    JSON.stringify(cart.value)
+  )
+}
+
 
 const addProduct = () => {
-  if (!newName.value || !newPrice.value) return
 
-  products.value.push({
-    id: Date.now(),
-    name: newName.value,
-    price: newPrice.value
-  })
+  if (!name.value || !price.value) {
+    alert("Enter name and price")
+    return
+  }
 
-  newName.value = ""
-  newPrice.value = ""
+
+  const newProduct = {
+    id: Date.now(),      
+    name: name.value,
+    price: price.value
+  }
+
+  products.value.push(newProduct)
+
+  saveProducts()
+
+  name.value = ""
+  price.value = ""
+}
+
+const deleteProduct = (index) => {
+  products.value.splice(index, 1)
+  saveProducts()
+}
+
+const filteredProducts = computed(() => {
+  return products.value.filter(p =>
+    p.name
+      .toLowerCase()
+      .includes(search.value.toLowerCase())
+  )
+})
+
+const addToCart = (product) => {
+  cart.value.push(product)
+  saveCart()
+}
+
+const removeFromCart = (index) => {
+  cart.value.splice(index, 1)
+  saveCart()
+}
+
+const checkout = () => {
+  let total = cart.value.reduce(
+    (sum, item) => sum + item.price,
+    0
+  )
+
+
+  let vat = total * 0.13
+
+
+  let grandTotal = total + vat
+
+
+  alert(
+    `Total: Rs ${total}
+VAT (13%): Rs ${vat.toFixed(2)}
+Grand Total: Rs ${grandTotal.toFixed(2)}`
+  )
+
+
+  cart.value = []
+  saveCart()
 }
 </script>
 
 <style>
-* {
-  box-sizing: border-box;
-  color: #ceb15f;
-  font-weight: bold;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f4f6f9;
-}
-
-
-.header {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 10px;
-}
-
-.cart-badge span {
-  background: white;
-  color: #4f46e5;
-  padding: 3px 8px;
-  border-radius: 50%;
-  margin-left: 5px;
-  font-weight: bold;
-}
-
-/* Layout */
 .container {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 10px;
+  max-width: 600px;
+  margin: auto;
+  font-family: Arial;
+  color: black;
 }
 
-/* Card */
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
 
-/* Form */
-.form input {
-  margin-right: 10px;
-  padding: 8px;
-}
-
-/* Product Grid */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.product-card {
-  background: #fafafa;
-  padding: 12px;
-  border-radius: 8px;
+h1 {
   text-align: center;
 }
 
-.price {
-  color: #4f46e5;
-  font-weight: bold;
+
+.card {
+  background: #f4f4f4;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
 }
 
-/* Buttons */
+
+input {
+  padding: 8px;
+  margin: 5px;
+}
+
+
 button {
   padding: 6px 10px;
-  border: none;
-  border-radius: 5px;
+  margin: 5px;
   cursor: pointer;
 }
 
-.primary {
-  background: #4f46e5;
+
+.delete {
+  background: red;
   color: white;
 }
 
-.danger {
-  background: #ef4444;
+
+.checkout {
+  background: green;
   color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+
+.product {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
 }
 </style>
