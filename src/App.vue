@@ -54,17 +54,30 @@
 
       <div v-if="cart.length === 0">Cart is empty</div>
 
-      <div
-        v-for="(item, index) in cart"
-        :key="index"
-        class="product"
-      >
-        <span>{{ item.name }} - Rs {{ item.price }}</span>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Product name</th>
+            <th>Quantity</th>
+            <th>price</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
 
-        <button class="delete" @click="removeFromCart(index)">
-          Remove
-        </button>
-      </div>
+          <tr v-for = "(item,index) in cart" :key="index">
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity || 1 }}</td>
+            <td>Rs {{ item.price }}</td>
+            <td>Rs {{ (item.price * (item.quantity || 1)) }}</td>
+            <td>
+              <button class="delete" @click="removeFromCart(index)">Remove</button>
+            </td> 
+          </tr>
+        </tbody>
+      </table>
+
 
       <button
         v-if="cart.length"
@@ -149,10 +162,14 @@ const addProduct = () => {
   price.value = ""
 }
 
-// const deleteProduct = (index) => {
-//   products.value.splice(index, 1)
-//   saveProducts()
-// }
+const deleteProduct = (index) => {
+  const productId = products.value[index].id
+
+  product.value.splice(index,1)
+  cart.value = cart.value.filter(item => item.id !== productId)
+  saveProducts()
+  saveCarts()
+}
 
 const removeItem = () => {
   emit('remove-item', props.item.id); 
@@ -169,6 +186,10 @@ const filteredProducts = computed(() => {
 })
 
 const addToCart = (product) => {
+  cart.value.find(item => item.id === product.id)
+    ? cart.value.find(item => item.id === product.id).quantity =
+        (cart.value.find(item => item.id === product.id).quantity || 1) + 1
+     :
   cart.value.push(product)
   saveCart()
 }
