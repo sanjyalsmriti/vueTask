@@ -2,7 +2,7 @@
   <div class="main-container">
     <h1>Mini E-Commerce</h1>
 
-  <div class="card">
+  <div class="card-card card">
   <h2>Add Product</h2> <br />
 
   <label>Product Name</label>
@@ -104,7 +104,7 @@ import { ref, computed, onMounted } from "vue"
 const name = ref("")      
 const price = ref("")     
 const quantity = ref(1)
-const search = ref("")    
+const search = ref("")   
 
 const products = ref([])  
 const cart = ref([])      
@@ -116,6 +116,7 @@ onMounted(() => {
   cart.value =
     JSON.parse(localStorage.getItem("cart")) || []
 })
+
 
 const saveProducts = () => {
   localStorage.setItem(
@@ -266,7 +267,7 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
 
 <style>
 *{
-  color: black;
+  color: white;
 }
 .product-table {
   width: 100%;
@@ -279,7 +280,7 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
   text-align: center;
 }
 .product-table th {
-  background: #eaeaea;
+  background: rgb(255 255 255 / 21%);
 }
 .action-buttons {
   display: flex;
@@ -309,7 +310,7 @@ h1 {
 
 
 .card {
-  background: #f4f4f4;
+  background: #718093;
   padding: 15px;
   margin: 15px 0;
   border-radius: 8px;
@@ -319,6 +320,8 @@ h1 {
 input {
   padding: 8px;
   margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 
@@ -326,6 +329,9 @@ button {
   padding: 6px 10px;
   margin: 5px;
   cursor: pointer;
+  color: white;
+  background: rgb(255 255 255 / 21%);
+
 }
 
 
