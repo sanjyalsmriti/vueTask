@@ -34,7 +34,7 @@
         <thead>
           <tr>
             <th>Product Name</th>
-            <th>Price</th>
+            <th>Per Price</th>
             <th>In Stock</th>
             <th>Action</th>
           </tr>
@@ -52,12 +52,18 @@
               </div>
             </td>
           </tr>
+          
+<tr v-if="filteredProducts.length === 0"class="no-products-msg">
+  <td colspan="4" style="color: white; font-weight: bold; margin-top: 5px; font-size: 0.9rem;">
+    No products found
+  </td>
+</tr>
         </tbody>
       </table>
     </div>
 
     <div class="card">
-      <h2>Cart 🛒 ({{ cart.length }})</h2>
+      <h2>Cart({{ cart.length }})</h2>
 
       <div v-if="cart.length === 0">Cart is empty</div>
 
@@ -66,7 +72,7 @@
           <tr>
             <th>Product name</th>
             <th>Quantity</th>
-            <th>price</th>
+            <th>per price</th>
             <th>Total</th>
             <th>Action</th>
           </tr>
@@ -306,7 +312,8 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
 .add-input-column {
   display: flex;          
   flex-direction: column; 
-  gap: 8px;               
+  gap: 8px;     
+}          
 
 h1 {
   text-align: center;
