@@ -9,14 +9,20 @@
   <input v-model="name" placeholder="Enter product name" />
 
   <label>Price (Rs)</label>
-<input
-  v-model.number="price"
-  type="number"
-  placeholder="Enter price"
-  min="0"
-  
-  oninput="this.value = Math.abs(this.value)"
-/>
+  <input
+    v-model.number="price"
+    type="number"
+    placeholder="Enter price"
+    min="0"
+  />
+
+  <label>Quantity</label>
+  <input
+    v-model.number="quantity"
+    type="number"
+    placeholder="Enter quantity"
+    min="1"
+  />
 
   <button @click="addProduct">Add</button>
 </div>
@@ -29,7 +35,7 @@
           <tr>
             <th>Product Name</th>
             <th>Price</th>
-            <th>Quantity</th>
+            <th>In Stock</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -37,10 +43,11 @@
           <tr v-for="(product, index) in filteredProducts" :key="product.id">
             <td>{{ product.name }}</td>
             <td>Rs {{ product.price }}</td>
-            <td>{{ product.quantity || 1 }}</td>
+            <td>
+              {{ product.quantity }}</td>
             <td>
               <div class="action-buttons">
-                <button @click="addToCart(product)">Add to Cart</button>
+                <button @click="addToCart(product)" :disabled="!product.quantity || product.quantity < 1">Add to Cart</button>
                 <button class="delete" @click="deleteProduct(index)">Delete</button>
               </div>
             </td>
@@ -54,7 +61,7 @@
 
       <div v-if="cart.length === 0">Cart is empty</div>
 
-      <table border="1">
+      <table border="1" class="product-table">
         <thead>
           <tr>
             <th>Product name</th>
@@ -96,6 +103,7 @@ import { ref, computed, onMounted } from "vue"
 
 const name = ref("")      
 const price = ref("")     
+const quantity = ref(1)
 const search = ref("")    
 
 const products = ref([])  
@@ -118,10 +126,11 @@ const saveProducts = () => {
 
 
 const saveCart = () => {
+  saveProducts();
   localStorage.setItem(
     "cart",
     JSON.stringify(cart.value)
-  )
+  );
 }
 const blockNegative = (e) => {
   if (e.key === "-" || e.key === "e") {
@@ -149,10 +158,17 @@ const addProduct = () => {
     alert("Price must be greater than 0")
     return
   }
+
+  if (quantity.value === "" || quantity.value === null || quantity.value < 1) {
+    alert("Enter a valid quantity (at least 1)")
+    return
+  }
+
   const newProduct = {
     id: Date.now(),
     name: name.value,
-    price: Number(price.value)
+    price: Number(price.value),
+    quantity: Number(quantity.value)
   }
 
   products.value.push(newProduct)
@@ -160,6 +176,7 @@ const addProduct = () => {
 
   name.value = ""
   price.value = ""
+  quantity.value = 1
 }
 
 const deleteProduct = (index) => {
@@ -186,17 +203,34 @@ const filteredProducts = computed(() => {
 })
 
 const addToCart = (product) => {
-  cart.value.find(item => item.id === product.id)
-    ? cart.value.find(item => item.id === product.id).quantity =
-        (cart.value.find(item => item.id === product.id).quantity || 1) + 1
-     :
-  cart.value.push(product)
-  saveCart()
+
+  const prod = products.value.find(p => p.id === product.id)
+  if (!prod) return;
+
+  if (!prod.quantity || prod.quantity < 1) {
+    return;
+  }
+ 
+  prod.quantity = prod.quantity - 1;
+  const cartItem = cart.value.find(item => item.id === product.id)
+  if (cartItem) {
+    cartItem.quantity = cartItem.quantity + 1;
+  } else {
+    cart.value.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+  }
+  saveCart();
 }
 
 const removeFromCart = (index) => {
-  cart.value.splice(index, 1)
-  saveCart()
+  const item = cart.value[index];
+  if (item) {
+    const prod = products.value.find(p => p.id === item.id);
+    if (prod) {
+      prod.quantity = (prod.quantity || 0) + (item.quantity || 1);
+    }
+  }
+  cart.value.splice(index, 1);
+  saveCart();
 }
 
 const checkout = () => {
