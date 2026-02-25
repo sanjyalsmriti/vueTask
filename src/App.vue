@@ -2,7 +2,7 @@
   <div class="main-container">
     <h1>Mini E-Commerce</h1>
 
-  <div class="card-card card">
+  <div class="card-card card add-input-column">
   <h2>Add Product</h2> <br />
 
   <label>Product Name</label>
@@ -267,7 +267,7 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
 
 <style>
 *{
-  color: white;
+  color: black;
 }
 .product-table {
   width: 100%;
@@ -280,7 +280,7 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
   text-align: center;
 }
 .product-table th {
-  background: rgb(255 255 255 / 21%);
+  background: red;
 }
 .action-buttons {
   display: flex;
@@ -303,6 +303,10 @@ Grand Total: Rs ${grandTotal.toFixed(2)}`
 }
 }
 
+.add-input-column {
+  display: flex;          
+  flex-direction: column; 
+  gap: 8px;               
 
 h1 {
   text-align: center;
