@@ -180,12 +180,18 @@ const addProduct = () => {
 }
 
 const deleteProduct = (index) => {
-  const productId = products.value[index].id
+  const productId = products.value[index].id;
+  const isIncart = cart.value.some(item=>item.id === productId)
 
-  product.value.splice(index,1)
+  if (isIncart){
+    alert("cannot delete product that is in cart")
+    return;
+  }
+
+  products.value.splice(index,1)
   cart.value = cart.value.filter(item => item.id !== productId)
   saveProducts()
-  saveCarts()
+  saveCart()
 }
 
 const removeItem = () => {
@@ -235,7 +241,7 @@ const removeFromCart = (index) => {
 
 const checkout = () => {
   let total = cart.value.reduce(
-    (sum, item) => sum + item.price,
+    (sum, item) => sum + (item.price * (item.quantity || 1)),
     0
   )
 
