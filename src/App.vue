@@ -64,6 +64,7 @@
 
     <div class="card">
       <h2>Cart({{ cart.length }})</h2>
+      <input v-model="search" placeholder="Search cartItem..." />
 
       <div v-if="cart.length === 0">Cart is empty</div>
 
