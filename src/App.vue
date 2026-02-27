@@ -44,7 +44,9 @@
             <td>{{ product.name }}</td>
             <td>Rs {{ product.price }}</td>
             <td>
-              {{ product.quantity }}</td>
+              <span v-if="product.quantity === 0" style="color: red; font-weight: bold;">Out of stock</span>
+              <span v-else>{{ product.quantity }}</span>
+            </td>
             <td>
               <div class="action-buttons">
                 <button @click="addToCart(product)" :disabled="!product.quantity || product.quantity < 1">Add to Cart</button>
@@ -53,9 +55,14 @@
             </td>
           </tr>
           
-<tr v-if="filteredProducts.length === 0"class="no-products-msg">
+ <tr v-if="filteredProducts.length === 0" class="no-products-msg">
   <td colspan="4" style="color: white; font-weight: bold; margin-top: 5px; font-size: 0.9rem;">
     No products found
+  </td>
+</tr>
+<tr v-if="filteredProducts.length > 0 && filteredProducts.every(p => p.quantity < 1)" class="no-products-msg">
+  <td colspan="4" style="color: white; font-weight: bold; margin-top: 5px; font-size: 0.9rem;">
+    No product in stock
   </td>
 </tr>
         </tbody>
@@ -67,7 +74,6 @@
       <input v-model="cartSearch" placeholder="Search cartItem..." />
 
       <div v-if="cart.length === 0">Cart is empty</div>
-
       <table border="1" class="product-table">
         <thead>
           <tr>
@@ -101,12 +107,9 @@
     </div>
   </div>
 </template>
-
 <script setup>
 
 import { ref, computed, onMounted } from "vue"
-
-
 const name = ref("")      
 const price = ref("")     
 const quantity = ref(1)
@@ -209,8 +212,6 @@ const deleteProduct = (index) => {
 const removeItem = () => {
   emit('remove-item', props.item.id); 
 };
-
-
 
 const filteredProducts = computed(() => {
   return products.value.filter(p =>
