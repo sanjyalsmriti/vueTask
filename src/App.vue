@@ -44,8 +44,14 @@
             <td>{{ product.name }}</td>
             <td>Rs {{ product.price }}</td>
             <td>
-              <span v-if="product.quantity === 0" style="color: red; font-weight: bold;">Out of stock</span>
-              <span v-else>{{ product.quantity }}</span>
+              <template v-if="product.quantity === 0">
+                <span style="color: red; font-weight: bold;">Out of stock</span>
+                <div style="margin-top: 5px; display: flex; align-items: center; gap: 5px;">
+                  <input v-model.number="product._restockAmount" type="number" min="1" placeholder="Restock" style="width: 90px;" />
+                  <button @click="restockProduct(product)" :disabled="!product._restockAmount || product._restockAmount < 1">Restock</button>
+                </div>
+              </template>
+              <template v-else>{{ product.quantity }}</template>
             </td>
             <td>
               <div class="action-buttons">
@@ -62,7 +68,11 @@
 </tr>
 <tr v-if="filteredProducts.length > 0 && filteredProducts.every(p => p.quantity < 1)" class="no-products-msg">
   <td colspan="4" style="color: white; font-weight: bold; margin-top: 5px; font-size: 0.9rem;">
-    No product in stock
+    No product in stock<br>
+    <div style="margin-top: 10px;">
+      <input v-model.number="restockAmount" type="number" min="1" placeholder="Enter stock amount" style="margin-right: 8px; width: 140px;" />
+      <button @click="restockAllOutOfStock" :disabled="!restockAmount || restockAmount < 1">Restock</button>
+    </div>
   </td>
 </tr>
         </tbody>
@@ -107,6 +117,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 
 import { ref, computed, onMounted } from "vue"
@@ -118,11 +129,21 @@ const cartSearch = ref("")
 
 const products = ref([])  
 const cart = ref([])      
+
 const filteredCart = computed(() => {
   return cart.value.filter(item =>
     item.name.toLowerCase().includes(cartSearch.value.toLowerCase())
   );
 });
+
+
+const restockProduct = (product) => {
+  if (product._restockAmount && product._restockAmount > 0) {
+    product.quantity = product._restockAmount;
+    product._restockAmount = undefined;
+    saveProducts();
+  }
+};
 
 onMounted(() => {
   products.value =
