@@ -57,6 +57,7 @@
               <div class="action-buttons">
                 <button @click="addToCart(product)" :disabled="!product.quantity || product.quantity < 1">Add to Cart</button>
                 <button class="delete" @click="deleteProduct(index)">Delete</button>
+                <button class="edit" @click="editProduct(index)">Edit</button>
               </div>
             </td>
           </tr>
@@ -234,6 +235,31 @@ const removeItem = () => {
   emit('remove-item', props.item.id); 
 };
 
+const editProduct = (index) => {
+  const product = products.value[index];
+
+  const newName = prompt("Enter product name:", product.name);
+  if (newName === null || newName.trim() === "") return;
+
+  const newPrice = prompt("Enter price:", product.price);
+  if (newPrice === null || Number(newPrice) <= 0) {
+    alert("Price must be greater than 0");
+    return;
+  }
+
+  const newQuantity = prompt("Enter quantity:", product.quantity);
+  if (newQuantity === null || Number(newQuantity) < 0) {
+    alert("Quantity must be 0 or more");
+    return;
+  }
+
+  // Update product
+  product.name = newName.trim();
+  product.price = Number(newPrice);
+  product.quantity = Number(newQuantity);
+
+  saveProducts();
+};
 const filteredProducts = computed(() => {
   return products.value.filter(p =>
     p.name
