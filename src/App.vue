@@ -64,7 +64,7 @@
 
     <div class="card">
       <h2>Cart({{ cart.length }})</h2>
-      <input v-model="search" placeholder="Search cartItem..." />
+      <input v-model="cartSearch" placeholder="Search cartItem..." />
 
       <div v-if="cart.length === 0">Cart is empty</div>
 
@@ -80,7 +80,7 @@
         </thead>
         <tbody>
 
-          <tr v-for = "(item,index) in cart" :key="index">
+          <tr v-for = "(item,index) in filteredCart" :key="index">
             <td>{{ item.name }}</td>
             <td>{{ item.quantity || 1 }}</td>
             <td>Rs {{ item.price }}</td>
@@ -91,8 +91,6 @@
           </tr>
         </tbody>
       </table>
-
-
       <button
         v-if="cart.length"
         class="checkout"
@@ -108,13 +106,20 @@
 
 import { ref, computed, onMounted } from "vue"
 
+
 const name = ref("")      
 const price = ref("")     
 const quantity = ref(1)
 const search = ref("")   
+const cartSearch = ref("")
 
 const products = ref([])  
 const cart = ref([])      
+const filteredCart = computed(() => {
+  return cart.value.filter(item =>
+    item.name.toLowerCase().includes(cartSearch.value.toLowerCase())
+  );
+});
 
 onMounted(() => {
   products.value =
@@ -123,7 +128,6 @@ onMounted(() => {
   cart.value =
     JSON.parse(localStorage.getItem("cart")) || []
 })
-
 
 const saveProducts = () => {
   localStorage.setItem(
